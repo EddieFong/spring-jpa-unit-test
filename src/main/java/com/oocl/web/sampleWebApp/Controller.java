@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class Controller {
 
     @GetMapping
-    public ResponseEntity<String> returnMsg() {
+    public MessageResponse get() {
 
-        return ResponseEntity.ok(null);
+        return new MessageResponse("message");
     }
 }
