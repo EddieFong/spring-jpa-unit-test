@@ -23,6 +23,9 @@ public class ControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private SingleEntityRepository reposity;
+
     @Test
     public void should_get_msg() throws Exception {
 //        mvc.perform(MockMvcRequestBuilders.get("/message"))
@@ -30,23 +33,35 @@ public class ControllerTest {
 //                .andExpect(jsonPath("message",is("Message")));
     }
 
+
     @Test
-    public void should_get_msg2() throws Exception {
-        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/message")).andReturn();
-//        assertEquals(mvcResult.getResponse().getStatus(),200);\
-        String json = mvcResult.getResponse().getContentAsString();
+    public void should_get_content() throws Exception {
+        String json = getJsonResponse("/message");
         ObjectMapper objectMapper = new ObjectMapper();
         MessageResponse actual = objectMapper.readValue(json, MessageResponse.class);
         assertEquals("message", actual.getMessage());
     }
 
+    private String getJsonResponse(String link) throws Exception {
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(link)).andReturn();
+        return mvcResult.getResponse().getContentAsString();
+    }
+
+
     @Test
-    public void should_get_content() throws Exception {
-        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/message")).andReturn();
-//        assertEquals(mvcResult.getResponse().getStatus(),200);\
-        String json = mvcResult.getResponse().getContentAsString();
+    public void should_get_content_from_db() throws Exception {
+
+        final String singleEntityName = "Hi";
+        SingleEntity singleEntity = new SingleEntity();
+        singleEntity.id =  2L;
+        singleEntity.name= singleEntityName;
+        reposity.save(singleEntity);
+        reposity.flush();
+
+        final String json = getJsonResponse("/message");
+
         ObjectMapper objectMapper = new ObjectMapper();
         MessageResponse actual = objectMapper.readValue(json, MessageResponse.class);
-        assertEquals("message", actual.getMessage());
+        assertEquals("Hi", actual.getMessage());
     }
 }
